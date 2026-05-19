@@ -9,6 +9,7 @@ import Confetti from './components/Confetti.jsx';
 
 export default function App() {
   const [bet, setBet] = useState(0);
+  const [lastBet, setLastBet] = useState(0);
   const { stats, winRate, recordResult, resetStats } = useStats();
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -17,9 +18,10 @@ export default function App() {
     dealerHand, dealerHidden,
     bankroll, bet: activeBet,
     phase, result, splitResult,
+    showInsurance,
     canSplit,
     playerTotal, splitTotal, dealerTotal,
-    startGame, hit, stand, doubleDown, split, resetGame,
+    startGame, hit, stand, doubleDown, split, resetGame, takeInsurance,
   } = useBlackjack();
 
   useEffect(() => {
@@ -110,6 +112,7 @@ export default function App() {
         position: 'relative',
         boxShadow: '0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
       }}>
+
         {/* gold ring */}
         <div style={{
           position: 'absolute', inset: '-3px', borderRadius: '34px',
@@ -137,8 +140,9 @@ export default function App() {
         {/* player hands */}
         {playerHand.length > 0 && (
           splitHand ? (
-            // split layout — two hands side by side
             <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
+
+              {/* hand 1 */}
               <div style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
                 opacity: phase === 'player' && activeHandIndex !== 0 ? 0.45 : 1,
@@ -148,11 +152,10 @@ export default function App() {
                 {phase === 'player' && activeHandIndex === 0 && (
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%',
-                    background: '#4ade80',
-                    boxShadow: '0 0 8px #4ade80',
+                    background: '#4ade80', boxShadow: '0 0 8px #4ade80',
                   }} />
                 )}
-                {result && phase === 'result' && (
+                {phase === 'result' && result && (
                   <div className="result-pop" style={{
                     color: ['win','blackjack'].includes(result) ? '#4ade80' : result === 'push' ? '#fbbf24' : '#f87171',
                     fontFamily: '"Cinzel", serif', fontSize: '14px', fontWeight: 'bold',
@@ -162,6 +165,7 @@ export default function App() {
                 )}
               </div>
 
+              {/* hand 2 */}
               <div style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
                 opacity: phase === 'player' && activeHandIndex !== 1 ? 0.45 : 1,
@@ -171,11 +175,10 @@ export default function App() {
                 {phase === 'player' && activeHandIndex === 1 && (
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%',
-                    background: '#4ade80',
-                    boxShadow: '0 0 8px #4ade80',
+                    background: '#4ade80', boxShadow: '0 0 8px #4ade80',
                   }} />
                 )}
-                {splitResult && phase === 'result' && (
+                {phase === 'result' && splitResult && (
                   <div className="result-pop" style={{
                     color: ['win','blackjack'].includes(splitResult) ? '#4ade80' : splitResult === 'push' ? '#fbbf24' : '#f87171',
                     fontFamily: '"Cinzel", serif', fontSize: '14px', fontWeight: 'bold',
@@ -196,7 +199,12 @@ export default function App() {
             bet={bet}
             setBet={setBet}
             bankroll={bankroll}
-            onDeal={(amount) => { startGame(amount); setBet(0); }}
+            lastBet={lastBet}
+            onDeal={(amount) => {
+              setLastBet(amount);
+              startGame(amount);
+              setBet(0);
+            }}
           />
         )}
 
@@ -213,10 +221,12 @@ export default function App() {
               bankroll={bankroll}
               bet={activeBet}
               canSplit={canSplit}
+              showInsurance={showInsurance}
               onHit={hit}
               onStand={stand}
               onDouble={doubleDown}
               onSplit={split}
+              onInsurance={takeInsurance}
               onNext={resetGame}
             />
 
