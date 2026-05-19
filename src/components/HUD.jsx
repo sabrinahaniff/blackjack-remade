@@ -1,5 +1,6 @@
 import { getHint } from '../lib/basicStrategy.js';
 import { getResultMessage } from '../lib/gameLogic.js';
+import { useState } from 'react';
 
 const HINT_LABELS = {
   H: { label: 'Hit', color: '#ef4444' },
