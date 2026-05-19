@@ -14,18 +14,11 @@ function ActionBtn({ label, color, onClick }) {
     <button
       onClick={onClick}
       style={{
-        background: color,
-        border: 'none',
-        color: '#fff',
-        borderRadius: '8px',
-        padding: '12px 28px',
-        cursor: 'pointer',
-        fontFamily: '"Cinzel", Georgia, serif',
-        fontSize: '15px',
-        fontWeight: 'bold',
-        letterSpacing: '0.05em',
-        boxShadow: `0 3px 0 rgba(0,0,0,0.3)`,
-        transition: 'transform 0.1s, box-shadow 0.1s',
+        background: color, border: 'none', color: '#fff',
+        borderRadius: '8px', padding: '12px 28px',
+        cursor: 'pointer', fontFamily: '"Cinzel", Georgia, serif',
+        fontSize: '15px', fontWeight: 'bold', letterSpacing: '0.05em',
+        boxShadow: '0 3px 0 rgba(0,0,0,0.3)', transition: 'transform 0.1s, box-shadow 0.1s',
       }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
@@ -36,38 +29,11 @@ function ActionBtn({ label, color, onClick }) {
   );
 }
 
-function ResultBadge({ result }) {
-  const color = ['win', 'blackjack'].includes(result) ? '#4ade80'
-    : result === 'push' ? '#fbbf24'
-    : '#f87171';
-
-  const labels = {
-    win: 'Win', blackjack: 'Blackjack!',
-    push: 'Push', bust: 'Bust', lose: 'Lose',
-  };
-
-  return (
-    <div className="result-pop" style={{
-      background: 'rgba(0,0,0,0.4)',
-      border: `1px solid ${color}`,
-      borderRadius: '8px',
-      padding: '4px 14px',
-      color,
-      fontFamily: '"Cinzel", Georgia, serif',
-      fontSize: '14px',
-      fontWeight: 'bold',
-      marginTop: '8px',
-    }}>
-      {labels[result] || result}
-    </div>
-  );
-}
-
 export default function HUD({
   phase, result, splitResult,
   playerHand, dealerHand, dealerHidden,
-  bankroll, bet, canSplit,
-  onHit, onStand, onDouble, onSplit, onNext,
+  bankroll, bet, canSplit, showInsurance,
+  onHit, onStand, onDouble, onSplit, onNext, onInsurance,
 }) {
   const [showHint, setShowHint] = useState(false);
 
@@ -77,16 +43,33 @@ export default function HUD({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', width: '100%' }}>
-      <span style={{
-        color: 'rgba(255,255,255,0.4)',
-        fontFamily: '"EB Garamond", Georgia, serif',
-        fontSize: '14px',
-      }}>
+      <span style={{ color: 'rgba(255,255,255,0.4)', fontFamily: '"EB Garamond", Georgia, serif', fontSize: '14px' }}>
         Bankroll: <strong style={{ color: '#fbbf24' }}>${bankroll}</strong>
         &nbsp;|&nbsp;
         Bet: <strong style={{ color: '#fbbf24' }}>${bet}</strong>
       </span>
 
+      {/* insurance offer */}
+      {phase === 'insurance' && (
+        <div className="slide-up" style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+          background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(251,191,36,0.3)',
+          borderRadius: '12px', padding: '16px 24px', textAlign: 'center',
+        }}>
+          <span style={{ color: '#fbbf24', fontFamily: '"Cinzel", Georgia, serif', fontSize: '15px', fontWeight: 'bold' }}>
+            Dealer shows an Ace
+          </span>
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontFamily: '"EB Garamond", Georgia, serif', fontSize: '13px' }}>
+            Take insurance for ${Math.floor(bet / 2)}? Pays 2:1 if dealer has blackjack.
+          </span>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <ActionBtn label="Take Insurance" color="#f59e0b" onClick={() => onInsurance(true)} />
+            <ActionBtn label="No Thanks" color="#6b7280" onClick={() => onInsurance(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* player actions */}
       {phase === 'player' && (
         <>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -103,15 +86,10 @@ export default function HUD({
           <button
             onClick={() => setShowHint(p => !p)}
             style={{
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: 'rgba(255,255,255,0.45)',
-              borderRadius: '6px',
-              padding: '5px 14px',
-              cursor: 'pointer',
-              fontFamily: '"EB Garamond", Georgia, serif',
-              fontSize: '13px',
-              fontStyle: 'italic',
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.2)',
+              color: 'rgba(255,255,255,0.45)', borderRadius: '6px', padding: '5px 14px',
+              cursor: 'pointer', fontFamily: '"EB Garamond", Georgia, serif',
+              fontSize: '13px', fontStyle: 'italic',
             }}
           >
             {showHint ? 'Hide hint' : '💡 Basic strategy hint'}
@@ -121,11 +99,9 @@ export default function HUD({
             <div className="slide-up" style={{
               background: 'rgba(0,0,0,0.35)',
               border: `1px solid ${HINT_LABELS[hint].color}`,
-              borderRadius: '8px',
-              padding: '8px 20px',
+              borderRadius: '8px', padding: '8px 20px',
               color: HINT_LABELS[hint].color,
-              fontFamily: '"EB Garamond", Georgia, serif',
-              fontSize: '15px',
+              fontFamily: '"EB Garamond", Georgia, serif', fontSize: '15px',
             }}>
               Basic strategy says: <strong>{HINT_LABELS[hint].label}</strong>
             </div>
@@ -133,30 +109,35 @@ export default function HUD({
         </>
       )}
 
+      {/* result */}
       {phase === 'result' && (
         <div className="slide-up" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           {splitResult ? (
             <div style={{ display: 'flex', gap: '24px', justifyContent: 'center' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontFamily: '"Cinzel", serif', letterSpacing: '0.1em' }}>HAND 1</span>
-                <ResultBadge result={result} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontFamily: '"Cinzel", serif', letterSpacing: '0.1em' }}>HAND 2</span>
-                <ResultBadge result={splitResult} />
-              </div>
+              {[['HAND 1', result], ['HAND 2', splitResult]].map(([label, res]) => (
+                <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', fontFamily: '"Cinzel", serif', letterSpacing: '0.1em' }}>
+                    {label}
+                  </span>
+                  <div className="result-pop" style={{
+                    background: 'rgba(0,0,0,0.4)',
+                    border: `1px solid ${['win','blackjack'].includes(res) ? '#4ade80' : res === 'push' ? '#fbbf24' : '#f87171'}`,
+                    borderRadius: '8px', padding: '4px 16px',
+                    color: ['win','blackjack'].includes(res) ? '#4ade80' : res === 'push' ? '#fbbf24' : '#f87171',
+                    fontFamily: '"Cinzel", serif', fontSize: '14px', fontWeight: 'bold',
+                  }}>
+                    {res === 'blackjack' ? 'BJ!' : res.charAt(0).toUpperCase() + res.slice(1)}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <div style={{
-              fontSize: '28px',
-              fontWeight: 'bold',
+            <div className="result-pop" style={{
+              fontSize: '28px', fontWeight: 'bold',
               fontFamily: '"Cinzel", Georgia, serif',
-              color: ['win', 'blackjack'].includes(result) ? '#4ade80'
-                : result === 'push' ? '#fbbf24'
-                : '#f87171',
-              textAlign: 'center',
-              letterSpacing: '0.05em',
-            }} className="result-pop">
+              color: ['win','blackjack'].includes(result) ? '#4ade80' : result === 'push' ? '#fbbf24' : '#f87171',
+              textAlign: 'center', letterSpacing: '0.05em',
+            }}>
               {getResultMessage(result)}
             </div>
           )}
@@ -165,15 +146,10 @@ export default function HUD({
             onClick={onNext}
             style={{
               background: 'linear-gradient(135deg, #16a34a, #15803d)',
-              border: '2px solid #14532d',
-              color: '#fff',
-              borderRadius: '10px',
-              padding: '12px 40px',
-              cursor: 'pointer',
-              fontFamily: '"Cinzel", Georgia, serif',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              letterSpacing: '0.1em',
+              border: '2px solid #14532d', color: '#fff',
+              borderRadius: '10px', padding: '12px 40px',
+              cursor: 'pointer', fontFamily: '"Cinzel", Georgia, serif',
+              fontSize: '16px', fontWeight: 'bold', letterSpacing: '0.1em',
               boxShadow: '0 4px 0 #14532d',
             }}
           >
