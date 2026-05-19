@@ -44,14 +44,6 @@ npm run dev
 
 Opens at `http://localhost:5173`
 
----
-
-## what's next
-
-- Mobile responsive layout
-- Win/loss history streak bar
-- Game over screen when bankroll hits $0
-- More gameplay: surrender, side bets
 
 ---
 
