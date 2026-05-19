@@ -92,7 +92,7 @@ export default function App() {
         {playerHand.length > 0 && (
           <Hand
             hand={playerHand}
-            label={`You — ${playerTotal}`}
+            label={`You - ${playerTotal}`}
           />
         )}
 
