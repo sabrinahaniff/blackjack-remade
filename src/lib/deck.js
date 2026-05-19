@@ -21,3 +21,33 @@ export function shuffle(deck) {
   return d;
 }
 
+export function getCardValue(card) {
+  if (['J', 'Q', 'K'].includes(card.value)) return 10;
+  if (card.value === 'A') return 11;
+  return parseInt(card.value);
+}
+
+export function getHandTotal(hand) {
+  let total = 0;
+  let aces = 0;
+  for (const card of hand) {
+    total += getCardValue(card);
+    if (card.value === 'A') aces++;
+  }
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return total;
+}
+
+export function isSoft(hand) {
+  let total = 0;
+  let aces = 0;
+  for (const card of hand) {
+    total += getCardValue(card);
+    if (card.value === 'A') aces++;
+  }
+  // soft = has an ace counting as 11
+  return aces > 0 && total <= 21;
+}
