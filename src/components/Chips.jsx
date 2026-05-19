@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sounds } from '../lib/sounds.js';
 
 const CHIP_VALUES = [2, 5, 25, 100, 500];
 
@@ -16,8 +17,7 @@ function ChipCircle({ value, size = 56, onClick }) {
     <div
       onClick={onClick}
       style={{
-        width: `${size}px`,
-        height: `${size}px`,
+        width: `${size}px`, height: `${size}px`,
         borderRadius: '50%',
         backgroundColor: c.bg,
         border: `4px dashed ${c.border}`,
@@ -26,11 +26,8 @@ function ChipCircle({ value, size = 56, onClick }) {
         fontWeight: 'bold',
         fontFamily: '"Cinzel", Georgia, serif',
         cursor: onClick ? 'pointer' : 'default',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        userSelect: 'none',
-        flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        userSelect: 'none', flexShrink: 0,
         transition: 'transform 0.15s',
         boxShadow: `0 3px 0 ${c.border}`,
       }}
@@ -42,12 +39,13 @@ function ChipCircle({ value, size = 56, onClick }) {
   );
 }
 
-export default function Chips({ bet, setBet, bankroll, onDeal }) {
+export default function Chips({ bet, setBet, bankroll, onDeal, lastBet }) {
   const [chipStack, setChipStack] = useState([]);
 
   const addChip = (value) => {
     if (bet + value > bankroll) return;
     if (bet + value > 500) return;
+    sounds.chip();
     setBet(prev => prev + value);
     setChipStack(prev => [...prev, { value, id: Date.now() + Math.random() }]);
   };
@@ -57,29 +55,40 @@ export default function Chips({ bet, setBet, bankroll, onDeal }) {
     setChipStack([]);
   };
 
+  const useLastBet = () => {
+    if (!lastBet || lastBet > bankroll) return;
+    clearBet();
+    // decompose lastBet into chips greedily
+    let remaining = lastBet;
+    const newStack = [];
+    for (const v of [500, 100, 25, 5, 2]) {
+      while (remaining >= v) {
+        newStack.push({ value: v, id: Date.now() + Math.random() });
+        remaining -= v;
+        sounds.chip();
+      }
+    }
+    setBet(lastBet);
+    setChipStack(newStack);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%' }}>
       <span style={{
-        color: 'rgba(255,255,255,0.4)',
-        fontSize: '12px',
+        color: 'rgba(255,255,255,0.4)', fontSize: '12px',
         fontFamily: '"Cinzel", Georgia, serif',
-        letterSpacing: '0.15em',
-        textTransform: 'uppercase',
+        letterSpacing: '0.15em', textTransform: 'uppercase',
       }}>
         Place Your Bet
       </span>
 
-      {/* chip selector row */}
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
         {CHIP_VALUES.map(value => (
           <ChipCircle key={value} value={value} onClick={() => addChip(value)} />
         ))}
       </div>
 
-      {/* animated chip stack + bet amount */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '24px', minHeight: '80px' }}>
-
-        {/* stack */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '56px' }}>
           {chipStack.length === 0 ? (
             <div style={{
@@ -92,16 +101,7 @@ export default function Chips({ bet, setBet, bankroll, onDeal }) {
           ) : (
             <div style={{ position: 'relative', width: '56px', height: `${Math.min(chipStack.length * 14 + 42, 120)}px` }}>
               {chipStack.map((chip, i) => (
-                <div
-                  key={chip.id}
-                  className="chip-bounce"
-                  style={{
-                    position: 'absolute',
-                    bottom: `${i * 10}px`,
-                    left: 0,
-                    animationDelay: '0s',
-                  }}
-                >
+                <div key={chip.id} className="chip-bounce" style={{ position: 'absolute', bottom: `${i * 10}px`, left: 0 }}>
                   <ChipCircle value={chip.value} size={48} />
                 </div>
               ))}
@@ -109,34 +109,37 @@ export default function Chips({ bet, setBet, bankroll, onDeal }) {
           )}
         </div>
 
-        {/* bet amount + controls */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
           <span style={{
-            color: '#fbbf24',
-            fontSize: '36px',
-            fontWeight: 'bold',
-            fontFamily: '"Cinzel", Georgia, serif',
-            lineHeight: 1,
+            color: '#fbbf24', fontSize: '36px', fontWeight: 'bold',
+            fontFamily: '"Cinzel", Georgia, serif', lineHeight: 1,
           }}>
             ${bet}
           </span>
-          {bet > 0 && (
-            <button
-              onClick={clearBet}
-              style={{
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {bet > 0 && (
+              <button onClick={clearBet} style={{
                 background: 'rgba(255,255,255,0.07)',
                 border: '1px solid rgba(255,255,255,0.15)',
                 color: 'rgba(255,255,255,0.5)',
-                borderRadius: '6px',
-                padding: '4px 12px',
-                cursor: 'pointer',
-                fontFamily: '"EB Garamond", Georgia, serif',
-                fontSize: '13px',
-              }}
-            >
-              Clear
-            </button>
-          )}
+                borderRadius: '6px', padding: '4px 12px',
+                cursor: 'pointer', fontFamily: '"EB Garamond", Georgia, serif', fontSize: '13px',
+              }}>
+                Clear
+              </button>
+            )}
+            {lastBet && lastBet >= 2 && bet === 0 && lastBet <= bankroll && (
+              <button onClick={useLastBet} style={{
+                background: 'rgba(251,191,36,0.1)',
+                border: '1px solid rgba(251,191,36,0.3)',
+                color: '#fbbf24',
+                borderRadius: '6px', padding: '4px 12px',
+                cursor: 'pointer', fontFamily: '"EB Garamond", Georgia, serif', fontSize: '13px',
+              }}>
+                Rebuy ${lastBet}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -145,30 +148,15 @@ export default function Chips({ bet, setBet, bankroll, onDeal }) {
           onClick={() => onDeal(bet)}
           style={{
             background: 'linear-gradient(135deg, #16a34a, #15803d)',
-            border: '2px solid #14532d',
-            color: '#fff',
-            borderRadius: '10px',
-            padding: '13px 44px',
-            cursor: 'pointer',
-            fontFamily: '"Cinzel", Georgia, serif',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            letterSpacing: '0.1em',
-            boxShadow: '0 4px 0 #14532d',
-            transition: 'transform 0.1s, box-shadow 0.1s',
+            border: '2px solid #14532d', color: '#fff',
+            borderRadius: '10px', padding: '13px 44px',
+            cursor: 'pointer', fontFamily: '"Cinzel", Georgia, serif',
+            fontSize: '16px', fontWeight: 'bold', letterSpacing: '0.1em',
+            boxShadow: '0 4px 0 #14532d', transition: 'transform 0.1s, box-shadow 0.1s',
           }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 0 #14532d';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 0 #14532d';
-          }}
-          onMouseDown={e => {
-            e.currentTarget.style.transform = 'translateY(2px)';
-            e.currentTarget.style.boxShadow = '0 2px 0 #14532d';
-          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 0 #14532d'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 0 #14532d'; }}
+          onMouseDown={e => { e.currentTarget.style.transform = 'translateY(2px)'; e.currentTarget.style.boxShadow = '0 2px 0 #14532d'; }}
         >
           Deal
         </button>
