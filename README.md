@@ -2,7 +2,7 @@
 
 A browser-based Blackjack game built with React + Vite.
 
-This is actually a remake of the first real project I ever built which is a terminal Blackjack game I wrote in grade 10 when I was around 14. That version had ASCII card art, a hand-rolled Fisher-Yates shuffle, and way too many nested if statements. I lost the original code at some point, so I rebuilt it from scratch with everything I know now.
+This is actually a remake of the first real project I ever built which is a terminal Blackjack game I wrote when I was around 14. That version had ASCII card art, a hand-rolled Fisher-Yates shuffle, and way too many nested if statements. I lost the original code at some point, so I rebuilt it from scratch with everything I know now.
 
 ![alt text](image.png)
 ![alt text](image-1.png)
