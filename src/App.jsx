@@ -1,122 +1,132 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { useBlackjack } from './hooks/useBlackjack.js';
+import Hand from './components/Hand.jsx';
+import Chips from './components/Chips.jsx';
+import HUD from './components/HUD.jsx';
 
-function App() {
-  const [count, setCount] = useState(0)
+const styles = {
+  app: {
+    minHeight: '100vh',
+    backgroundColor: '#064e3b',
+    backgroundImage: `radial-gradient(ellipse at center, #065f46 0%, #022c22 100%)`,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '24px',
+    gap: '32px',
+  },
+  title: {
+    color: '#fbbf24',
+    fontFamily: 'Georgia, serif',
+    fontSize: '42px',
+    fontWeight: 'bold',
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
+    textShadow: '0 2px 12px rgba(0,0,0,0.5)',
+    margin: 0,
+  },
+  table: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '40px',
+    background: 'rgba(0,0,0,0.2)',
+    borderRadius: '24px',
+    padding: '32px 48px',
+    border: '2px solid rgba(255,255,255,0.1)',
+    minWidth: '480px',
+  },
+  divider: {
+    width: '100%',
+    height: '1px',
+    background: 'rgba(255,255,255,0.1)',
+  },
+  bust: {
+    color: '#f87171',
+    fontFamily: 'Georgia, serif',
+    fontSize: '13px',
+    letterSpacing: '0.1em',
+  },
+};
+
+export default function App() {
+  const [bet, setBet] = useState(0);
+  const {
+    playerHand,
+    dealerHand,
+    dealerHidden,
+    bankroll,
+    bet: activeBet,
+    phase,
+    result,
+    playerTotal,
+    dealerTotal,
+    startGame,
+    hit,
+    stand,
+    doubleDown,
+    resetGame,
+  } = useBlackjack();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div style={styles.app}>
+      <h1 style={styles.title}>Blackjack</h1>
 
-      <div className="ticks"></div>
+      <div style={styles.table}>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {/* dealer side */}
+        {dealerHand.length > 0 && (
+          <Hand
+            hand={dealerHand}
+            label={`Dealer${!dealerHidden ? ` — ${dealerTotal}` : ''}`}
+            dealerHidden={dealerHidden}
+          />
+        )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {dealerHand.length > 0 && playerHand.length > 0 && (
+          <div style={styles.divider} />
+        )}
+
+        {/* player side */}
+        {playerHand.length > 0 && (
+          <Hand
+            hand={playerHand}
+            label={`You — ${playerTotal}`}
+          />
+        )}
+
+        {/* betting phase */}
+        {phase === 'betting' && (
+          <Chips
+            bet={bet}
+            setBet={setBet}
+            bankroll={bankroll}
+            onDeal={(amount) => {
+              startGame(amount);
+              setBet(0);
+            }}
+          />
+        )}
+
+        {/* actions + result */}
+        {phase !== 'betting' && (
+          <HUD
+            phase={phase}
+            result={result}
+            playerHand={playerHand}
+            dealerHand={dealerHand}
+            dealerHidden={dealerHidden}
+            bankroll={bankroll}
+            bet={activeBet}
+            onHit={hit}
+            onStand={stand}
+            onDouble={doubleDown}
+            onNext={resetGame}
+          />
+        )}
+
+      </div>
+    </div>
+  );
 }
-
-export default App
