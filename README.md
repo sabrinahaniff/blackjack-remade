@@ -49,4 +49,4 @@ Opens at `http://localhost:5173`
 
 ## background
 
-The original version was a grade 10 CS project. It ran in the terminal, used ASCII art for cards, and had a basic dealer AI that just hit until 17. I'm rebuilding it properly as a way to see how far things have come since then.
+The original version was a CS project I made when we were allowed to build any app for our final exam. It ran in the terminal, used ASCII art for cards, and had a basic dealer AI that just hit until 17. I'm rebuilding it properly as a way to see how far things have come since then.
