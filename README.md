@@ -18,7 +18,7 @@ This is actually a remake of the first real project I ever built which is a term
 - Card deal animations + dealer card flip
 - Confetti on wins
 - Web Audio API sound effects: no libraries, just raw oscillators
-- Stats tracker persisted to localStorage — win rate, streak, biggest win, blackjack count
+- Stats tracker persisted to localStorage; win rate, streak, biggest win, blackjack count
 - Keyboard shortcuts: `H` hit, `S` stand, `D` double, `P` split
 - Rebuy button to instantly re-place your last bet
 
