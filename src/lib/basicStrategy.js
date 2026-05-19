@@ -47,3 +47,33 @@ const PAIRS = {
   '2': ['P','P','P','P','P','P','H','H','H','H'],
 };
 
+function dealerIndex(dealerCard) {
+  if (dealerCard.value === 'A') return 9;
+  if (['J','Q','K'].includes(dealerCard.value)) return 8;
+  return parseInt(dealerCard.value) - 2;
+}
+
+export function getHint(playerHand, dealerUpcard) {
+  const { getHandTotal, isSoft } = require('./deck.js');
+  const di = dealerIndex(dealerUpcard);
+  const total = getHandTotal(playerHand);
+
+  // check for pair
+  if (playerHand.length === 2 && playerHand[0].value === playerHand[1].value) {
+    const key = playerHand[0].value;
+    if (['J','Q','K'].includes(key)) {
+      // treat as 10s
+    } else if (PAIRS[key]) {
+      return PAIRS[key][di];
+    }
+  }
+
+  // soft hand
+  if (isSoft(playerHand) && SOFT[total]) {
+    return SOFT[total][di];
+  }
+
+  // hard hand
+  const clampedTotal = Math.min(Math.max(total, 8), 21);
+  return (HARD[clampedTotal] && HARD[clampedTotal][di]) || 'S';
+}
