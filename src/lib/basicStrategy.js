@@ -1,7 +1,5 @@
-// basic strat, mathematically optimal play for every possible hand
-// just like my old app returns 'H' (hit), 'S' (stand), 'D' (double), 'P' (split)
+import { getHandTotal, isSoft } from './deck.js';
 
-// hard totals vs dealer upcard (2-10, A)
 const HARD = {
   //        2    3    4    5    6    7    8    9   10    A
   21: ['S','S','S','S','S','S','S','S','S','S'],
@@ -20,7 +18,6 @@ const HARD = {
    8: ['H','H','H','H','H','H','H','H','H','H'],
 };
 
-// soft totals (hand contains an ace counting as 11)
 const SOFT = {
   //        2    3    4    5    6    7    8    9   10    A
   20: ['S','S','S','S','S','S','S','S','S','S'],
@@ -33,7 +30,6 @@ const SOFT = {
   13: ['H','H','H','D','D','H','H','H','H','H'],
 };
 
-// pairs
 const PAIRS = {
   //        2    3    4    5    6    7    8    9   10    A
   'A': ['P','P','P','P','P','P','P','P','P','P'],
@@ -54,26 +50,20 @@ function dealerIndex(dealerCard) {
 }
 
 export function getHint(playerHand, dealerUpcard) {
-  const { getHandTotal, isSoft } = require('./deck.js');
   const di = dealerIndex(dealerUpcard);
   const total = getHandTotal(playerHand);
 
-  // check for pair
   if (playerHand.length === 2 && playerHand[0].value === playerHand[1].value) {
     const key = playerHand[0].value;
-    if (['J','Q','K'].includes(key)) {
-      // treat as 10s
-    } else if (PAIRS[key]) {
+    if (!['J','Q','K'].includes(key) && PAIRS[key]) {
       return PAIRS[key][di];
     }
   }
 
-  // soft hand
   if (isSoft(playerHand) && SOFT[total]) {
     return SOFT[total][di];
   }
 
-  // hard hand
   const clampedTotal = Math.min(Math.max(total, 8), 21);
   return (HARD[clampedTotal] && HARD[clampedTotal][di]) || 'S';
 }
